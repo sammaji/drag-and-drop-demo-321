@@ -1,21 +1,22 @@
 "use client";
 
+import Controls from "@/components/controls";
 import HeroWithImage from "@/components/hero-with-image";
 import Navbar from "@/components/navbar";
 import SimpleHero from "@/components/simple-hero";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 enum ComponentList {
   NAVBAR,
   LANDING,
-  SIMPLE_LAYOUT
+  SIMPLE_LAYOUT,
 }
 
-type WidgetProp = {
-  name: String;
-  component: React.ReactNode;
-};
-type WidgetItemProp = Record<keyof typeof ComponentList, WidgetProp>
+type WidgetItemProp = Record<
+  keyof typeof ComponentList,
+  { name: String; component: React.ReactNode }
+>;
 
 const data: WidgetItemProp = {
   NAVBAR: {
@@ -28,48 +29,25 @@ const data: WidgetItemProp = {
   },
   SIMPLE_LAYOUT: {
     name: "Empty Layout",
-    component: <SimpleHero />
-  }
+    component: <SimpleHero />,
+  },
 };
 
-
-export function Controls(props: React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLDivElement>,
-  HTMLDivElement
-> & {isBottom: boolean},
-) {
-  const {children, isBottom, ...rest } = props;
-  const [isControlsVisible, setIsControlsVisible] = useState<boolean>(false);
-
-  function handleEnter(e: React.MouseEvent) {
-    setIsControlsVisible(true)
-  }
-
-  function handleLeave(e: React.MouseEvent) {
-    setIsControlsVisible(false)
-  }
-
-  return (
-    <div {...rest} className="hover:border-blue-600 border-[2px] relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-      {children}
-      {isControlsVisible && isBottom && <h2 className="absolute bg-blue-600 px-2 pr-4 py-2 text-[white] z-10 translate-x-[-2px] translate-y-[-100%]">{"Contols will be displayed here"}</h2>}
-      {isControlsVisible && !isBottom && <h2 className="absolute bg-blue-600 px-2 pr-4 py-2 text-[white] z-10 translate-x-[-2px]">{"Contols will be displayed here"}</h2>}
-    </div>
-  )
-}
-
-export function ComponentNavItem(
+function SideNavItem(
   props: React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
-  >,
+  >
 ) {
-  const { ...rest } = props;
+  const { className, ...rest } = props;
   return (
     <div
       {...rest}
       draggable
-      className="w-full text-[rgba(225,225,225,0.80)] hover:text-white px-4 py-2 border-b-[rgba(225,225,225,0.12)] border-b-[1px]"
+      className={cn(
+        "w-full text-[rgba(225,225,225,0.80)] hover:text-white px-4 py-2 border-b-[rgba(225,225,225,0.12)] border-b-[1px]",
+        className
+      )}
     ></div>
   );
 }
@@ -95,7 +73,7 @@ export default function Home() {
     <main className="grid grid-cols-[300px_1fr] min-h-screen min-w-screen">
       <div className="flex flex-col gap items-center justify-start bg-gray-900">
         {...Object.keys(data).map((key, index) => (
-          <ComponentNavItem
+          <SideNavItem
             key={index}
             draggable
             onDragStart={(e) => {
@@ -103,13 +81,15 @@ export default function Home() {
             }}
           >
             {data[key as keyof typeof ComponentList].name}
-          </ComponentNavItem>
+          </SideNavItem>
         ))}
       </div>
 
       <div onDrop={handleOnDrop} onDragOver={handleOnDragOver}>
         {widgets.map((widget, index) => (
-          <Controls key={index} isBottom={index === widgets.length-1}>{data[widget as keyof typeof ComponentList].component}</Controls>
+          <Controls key={index} isBottom={index === widgets.length - 1}>
+            {data[widget as keyof typeof ComponentList].component}
+          </Controls>
         ))}
       </div>
     </main>
